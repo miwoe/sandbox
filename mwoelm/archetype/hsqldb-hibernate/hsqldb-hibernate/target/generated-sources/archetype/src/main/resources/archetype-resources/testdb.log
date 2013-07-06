@@ -1,0 +1,4 @@
+/*C3*/SET SCHEMA PUBLIC
+drop table TextObject if exists
+create table TextObject (Object_ID integer not null, Text varchar(255), primary key (Object_ID))
+DISCONNECT

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/batch 
+	http://www.springframework.org/schema/batch/spring-batch-2.1.xsd">
+
+
+	<bean id="myClass" class="mwoelm.sample.MyClass" />
+
+	<batch:job id="myJob" job-repository="jobRepository">
+		<batch:step id="step1">
+			<batch:tasklet ref="myTasklet" />
+			<batch:next on="*" to="step2" />
+		</batch:step>
+		<batch:step id="step2">
+			<batch:tasklet>
+				<batch:chunk reader="itemReader" writer="itemWriter"
+					commit-interval="2" />
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<bean id="myTasklet" class="mwoelm.sample.MyTasklet" />
+
+	<bean id="jobLauncher"
+		class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+		<property name="jobRepository" ref="jobRepository" />
+	</bean>
+
+
+	<bean id="jobRepository"
+		class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+		<property name="transactionManager" ref="transactionManager" />
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
+
+	<bean id="itemReader" name="itemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+		<property name="lineMapper" ref="myLineMapper" />
+		<property name="resource" value="classpath:myObjects.txt"/>
+	</bean>
+
+	<bean id="myLineMapper" class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+		<property name="fieldSetMapper" ref="myObjectFieldSetMapper"/>
+		<property name="lineTokenizer" ref="myObjectLineTokenizer"/>
+	</bean>
+	
+	<bean id="myObjectFieldSetMapper" class="mwoelm.sample.MyObjectFieldSetMapper"/>
+	
+	<bean name="myObjectLineTokenizer"
+    class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer" />
+    
+    <bean id="itemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter">
+    	<property name="resource" value="file:myObjectCopy.txt"/>
+    	<property name="lineAggregator" ref="toString"/>
+    </bean>
+    
+    <bean id="toString" class="org.springframework.batch.item.file.transform.PassThroughLineAggregator"></bean>
+
+</beans>
+
+
+
