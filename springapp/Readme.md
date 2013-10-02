@@ -1,0 +1,1 @@
+This is a simple Spring 3 app (with an embedded Neo4j server)
